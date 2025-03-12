@@ -1,6 +1,6 @@
 import numpy as np
 
-def merge_chord_segments(time_chords, max_gap=0.5):
+def merge_chord_segments(time_chords):
     """
     合并相邻的相同和弦，允许微小间隔（max_gap秒内视为连续）
     :param time_chords: 列表，元素为 (start_time, end_time, chord)
@@ -19,8 +19,7 @@ def merge_chord_segments(time_chords, max_gap=0.5):
         current_start, current_end, current_chord = seg
         
         # 判断是否可合并：和弦相同且时间连续或间隔小于max_gap
-        if (current_chord == last[2] and 
-            current_start <= last[1] + max_gap):
+        if current_chord == last[2] :
             # 扩展合并段的结束时间
             last[1] = max(last[1], current_end)
         else:
@@ -42,10 +41,10 @@ def convert_frames_to_seconds(detected_chords, hop_length, sr, aggregate_window=
         time_chords.append((start_time, end_time, chord))
     
     # 合并连续/重叠的相同和弦
-    merged = merge_chord_segments(time_chords, max_gap=2.0)
+    merged = merge_chord_segments(time_chords)
     
     # 合并后处理：移除过短的段（可选）
-    merged = [ (s, e, c) for s, e, c in merged if e - s >= 3 ]  # 短于0.05秒的段视为噪声
+    # merged = [ (s, e, c) for s, e, c in merged if e - s >= 3 ]  # 短于0.05秒的段视为噪声
     
     return merged
 def match_chord(chroma_vector, templates):

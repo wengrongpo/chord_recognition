@@ -38,7 +38,7 @@ detected_chords = detect_chords(chroma, chordTemplates)
 # print("识别结果（时间帧 → 和弦）：", detected_chords)
 
 # 3. 转换为秒并合并
-merged = convert_frames_to_seconds(detected_chords, hop_length=1024, sr=22050, aggregate_window=50)
+merged = convert_frames_to_seconds(detected_chords, hop_length=1024, sr=22050, aggregate_window=10)
 
 # 4. 输出结果
 for start, end, chord in merged:
