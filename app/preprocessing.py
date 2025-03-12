@@ -34,6 +34,7 @@ def preprocess_and_convert_audio(input_path, output_path):
         # 转换音频文件为WAV格式
         audio = AudioSegment.from_file(input_path)
         audio = audio.set_channels(1).set_frame_rate(22050)  # 转单声道+重采样
+        audio = audio.normalize(headroom=0.0)  # 强制满量程（无余量）
         audio.export(output_path, format="wav")
     
     # # 提取Chroma特征
