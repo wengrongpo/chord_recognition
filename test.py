@@ -29,10 +29,10 @@ silence_frames, auto_threshold = detect_silence(
 )
 
 transition_frames = detect_transition(chroma)
-print(transition_frames)
+
 merge_flags = mark_merge_regions(silence_frames, transition_frames, chroma.shape[1])
 
-print(f"动态静音阈值: {auto_threshold:.2f} dB")  # 输出实际阈值
+# print(f"动态静音阈值: {auto_threshold:.2f} dB")  # 输出实际阈值
 
 
 # 3. 执行整曲识别
