@@ -174,15 +174,30 @@ def convert_and_merge(
     # 计算时间参数
     frame_duration = hop_length / sr
     window_duration = frame_duration * aggregate_window
-    
+    min_duration=   frame_duration * (aggregate_window+1)
     # 转换帧索引为秒，并标记需合并的段
     time_chords = []
-    for frame_idx, chord in detected_chords:
+    for index,frame_idx_chord in enumerate(detected_chords):
+
+        frame_idx,chord=frame_idx_chord
         start = frame_idx * frame_duration
         end = start + window_duration
         # 标记是否需合并（若未提供merge_flags，默认不合并）
         is_merge = merge_flags[frame_idx] if merge_flags is not None and frame_idx < len(merge_flags) else False
-        time_chords.append((start, end, chord, is_merge))
+        if index > 0 and  index < len(detected_chords)-1:
+            prev_flag=merge_flags[detected_chords[index-1][0]]
+            next_flag=merge_flags[detected_chords[index+1][0]]
+            # 场景1：将孤立的False变为True（夹在两个True中间）
+            if is_merge == False and prev_flag == True and next_flag == True:
+                is_merge=True
+                merge_flags[frame_idx]=True
+            # 场景2：将孤立的True变为False（夹在两个False中间）
+            elif is_merge == True and prev_flag == False and next_flag == False:
+                is_merge=False
+                merge_flags[frame_idx]=False
+        
+        time_chords.append([start, end, chord, is_merge])
+        
     
     # 单次遍历合并（结合连续相同和弦和静音标记）
     merged = []
@@ -190,10 +205,22 @@ def convert_and_merge(
         return merged
     
     current_start, current_end, current_chord, _ = time_chords[0]
-    for start, end, chord, is_merge in time_chords[1:]:
+    for i,start_end_chord_is_merge in enumerate(time_chords[1:]):
+       
+        current_flag=time_chords[i][3]
+        next_flag=time_chords[i+1][3]
+        
+        if  i == len(time_chords) - 2:
+            continue
+        
         # 合并条件：和弦相同 OR 标记需合并
+        start, end, chord, is_merge=start_end_chord_is_merge
+
         if dynamic_merge_condition(current_chord,chord,is_merge):
             current_end = max(current_end, end)
+        #静音段的和弦为后一个非静音段的和弦
+        elif current_flag==True and next_flag==False : 
+            current_chord=chord 
         else:
             if (current_end - current_start) >= min_duration:
                 merged.append((current_start, current_end, current_chord))

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 from app.preprocessing import preprocess_and_convert_audio
 from app.core.chord_templates import chordTemplates
-from app.core.recognition import convert_and_merge, convert_frames_to_seconds, detect_chords, detect_silence, detect_transition, mark_merge_regions, merge_chord_segments
+from app.core.recognition import convert_and_merge, detect_chords, detect_silence, detect_transition, mark_merge_regions
 #C G AM. EM. F. C. DM. G
 input_path="./C.m4a"
 output_path="test.wav"
@@ -39,12 +39,6 @@ print(f"动态静音阈值: {auto_threshold:.2f} dB")  # 输出实际阈值
 detected_chords = detect_chords(chroma, chordTemplates)
 # print("识别结果（时间帧 → 和弦）：", detected_chords)
 
-
-# merged_chords = merge_chord_segments(detected_chords, merge_flags)
-
-# # 4. 转换为秒并合并
-# merged = convert_frames_to_seconds(detected_chords, hop_length=1024, sr=22050, aggregate_window=10)
-
 # 4. 合并处理
 merged = convert_and_merge(
     detected_chords,
@@ -58,4 +52,3 @@ merged = convert_and_merge(
 # 5. 输出结果
 for start, end, chord in merged:
     print(f"{start:.2f}-{end:.2f}s: {chord}")
-
